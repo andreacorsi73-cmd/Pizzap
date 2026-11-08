@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e87524">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PizzApp">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>PizzApp · Calcolo farine e biga</title>
+<style>
+:root{color-scheme:light;--orange:#e87524;--ink:#242424;--muted:#6b7280;--line:#e7e7e7;--soft:#f5f5f5}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:520px;margin:0 auto;padding:14px 14px calc(28px + env(safe-area-inset-bottom))}
+header{background:var(--orange);color:white;border-radius:18px;padding:19px 18px;margin-bottom:18px}
+h1{font-size:27px;margin:0 0 4px;font-weight:800}header p{margin:0;font-size:12px;letter-spacing:.08em;font-weight:700}
+h2{font-size:17px;margin:0 0 13px}.section{padding:3px 2px 17px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.field{margin:12px 0}.field label{display:block;font-size:13px;color:#555;margin-bottom:6px}
+input[type=number]{width:100%;height:48px;border:1px solid #d7d7d7;border-radius:11px;padding:0 13px;font-size:17px;background:white;color:var(--ink);outline:none}
+input:focus{border-color:var(--orange);box-shadow:0 0 0 3px #e8752420}
+.pctline{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#pctDisplay{font-size:32px;font-weight:800;color:var(--orange);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--orange);margin:10px 0}
+.rangeends{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+.results{background:var(--soft);border-radius:14px;padding:15px;margin-top:10px}
+.resultrow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:14px}
+.resultrow strong{text-align:right;font-variant-numeric:tabular-nums}
+.biglabel{color:var(--muted);font-size:13px}.bigvalue{font-size:30px;font-weight:800;color:var(--orange);margin:3px 0 10px;font-variant-numeric:tabular-nums}
+hr{border:0;border-top:1px solid #ddd;margin:8px 0}
+.totalrow{font-weight:800;font-size:15px}.totalrow strong{color:var(--orange);font-size:20px}
+button{width:100%;height:48px;border:1px solid #d7d7d7;background:white;border-radius:12px;font-size:15px;font-weight:650;color:var(--ink);margin-top:16px}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin:13px 2px 0}
+.warning{display:none;color:#b42318;background:#fef3f2;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<main>
+<header><h1>🍕 PizzApp</h1><p>CALCOLO FARINE · BIGA</p></header>
+<section class="section">
+<h2>1. Quantità delle farine</h2>
+<div class="field"><label for="f1">Farina 1 (g)</label><input id="f1" type="number" min="0" step="any" value="0" inputmode="decimal"></div>
+<div class="field"><label for="f2">Farina 2 (g)</label><input id="f2" type="number" min="0" step="any" value="0" inputmode="decimal"></div>
+<div class="field"><label for="f3">Farina 3 (g)</label><input id="f3" type="number" min="0" step="any" value="0" inputmode="decimal"></div>
+</section>
+<section class="section">
+<h2>2. Percentuale biga</h2>
+<div class="pctline"><strong id="pctDisplay">0%</strong><span class="biglabel">Percentuale sul totale farine</span></div>
+<input id="pctSlider" type="range" min="0" max="100" step="1" value="0" aria-label="Percentuale biga">
+<div class="rangeends"><span>0%</span><span>100%</span></div>
+<div class="field"><label for="pctNumber">Percentuale manuale</label><input id="pctNumber" type="number" min="0" max="100" step="1" value="0" inputmode="numeric"></div>
+</section>
+<section>
+<h2>3. Risultato</h2>
+<div class="results">
+<div class="resultrow"><span>Farina totale</span><strong id="total">0 g</strong></div><hr>
+<div class="biglabel">Farina destinata alla biga</div><div class="bigvalue" id="biga">0 g</div><hr>
+<div class="resultrow"><span>Farina 1 nella biga</span><strong id="f1biga">0 g</strong></div>
+<div class="resultrow"><span>Farina 1 nell'impasto finale</span><strong id="f1final">0 g</strong></div>
+<div class="resultrow"><span>Farina 2 nell'impasto finale</span><strong id="f2final">0 g</strong></div>
+<div class="resultrow"><span>Farina 3 nell'impasto finale</span><strong id="f3final">0 g</strong></div><hr>
+<div class="resultrow totalrow"><span>Totale farine impasto finale</span><strong id="finalTotal">0 g</strong></div>
+</div>
+<div class="warning" id="warning">Attenzione: la Farina 1 non è sufficiente per preparare questa biga. Riduci la percentuale o aumenta la Farina 1.</div>
+<button id="reset" type="button">↻ Azzera tutto</button>
+<p class="note">La percentuale è calcolata sul totale delle tre farine. La quota per la biga viene sottratta esclusivamente dalla Farina 1. I calcoli si aggiornano automaticamente.</p>
+</section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const number = id => Math.max(0, Number($(id).value) || 0);
+const fmt = n => n.toLocaleString('it-IT',{maximumFractionDigits:1});
+function calculate(){
+  const a=number('f1'), b=number('f2'), c=number('f3'), p=Math.min(100,Math.max(0,number('pctNumber')));
+  const total=a+b+c, biga=total*p/100, enough=biga<=a+1e-9;
+  $('pctDisplay').textContent=p+'%'; $('pctSlider').value=p;
+  $('total').textContent=fmt(total)+' g'; $('biga').textContent=fmt(biga)+' g';
+  $('f1biga').textContent=fmt(biga)+' g'; $('f1final').textContent=fmt(a-biga)+' g';
+  $('f2final').textContent=fmt(b)+' g'; $('f3final').textContent=fmt(c)+' g';
+  $('finalTotal').textContent=fmt(total-biga)+' g';
+  $('warning').style.display=enough?'none':'block';
+}
+['f1','f2','f3','pctNumber'].forEach(id=>$(id).addEventListener('input',calculate));
+$('pctSlider').addEventListener('input',()=>{$('pctNumber').value=$('pctSlider').value;calculate()});
+$('reset').addEventListener('click',()=>{['f1','f2','f3','pctNumber'].forEach(id=>$(id).value=0);$('pctSlider').value=0;calculate()});
+calculate();
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
